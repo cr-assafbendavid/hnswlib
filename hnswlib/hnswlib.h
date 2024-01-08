@@ -26,18 +26,9 @@
 #include <queue>
 #include <vector>
 #include <iostream>
-#include <string.h>
 
 namespace hnswlib {
     typedef size_t labeltype;
-
-    template <typename T>
-    class pairGreater {
-    public:
-        bool operator()(const T& p1, const T& p2) {
-            return p1.first > p2.first;
-        }
-    };
 
     template<typename T>
     static void writeBinaryPOD(std::ostream &out, const T &podRef) {
@@ -49,36 +40,33 @@ namespace hnswlib {
         in.read((char *) &podRef, sizeof(T));
     }
 
-    template<typename MTYPE>
-    using DISTFUNC = MTYPE(*)(const void *, const void *, const void *);
+    template<typename dist_t>
+    using DISTFUNC = dist_t(*)(const void *, const void *, const void *);
 
-
-    template<typename MTYPE>
+    template<typename dist_t>
     class SpaceInterface {
     public:
-        //virtual void search(void *);
         virtual size_t get_data_size() = 0;
 
-        virtual DISTFUNC<MTYPE> get_dist_func() = 0;
+        virtual DISTFUNC<dist_t> get_dist_func() = 0;
 
         virtual void *get_dist_func_param() = 0;
 
-        virtual ~SpaceInterface() {}
+        virtual ~SpaceInterface() = default;
     };
 
     template<typename dist_t>
     class AlgorithmInterface {
     public:
-        virtual void addPoint(const void *datapoint, labeltype label)=0;
-        virtual std::priority_queue<std::pair<dist_t, labeltype >> searchKnn(const void *, size_t) const = 0;
+        virtual void addPoint(const void *datapoint, labeltype label) = 0;
+        virtual std::priority_queue<std::pair<dist_t, labeltype>> searchKnn(const void *, size_t) const = 0;
 
-        // Return k nearest neighbor in the order of closer fist
+        // Return k nearest neighbor in the order of closer first
         virtual std::vector<std::pair<dist_t, labeltype>>
             searchKnnCloserFirst(const void* query_data, size_t k) const;
 
-        virtual void saveIndex(const std::string &location)=0;
-        virtual ~AlgorithmInterface(){
-        }
+        virtual void saveIndex(const std::string &location) = 0;
+        virtual ~AlgorithmInterface() = default;
     };
 
     template<typename dist_t>
@@ -104,5 +92,7 @@ namespace hnswlib {
 
 #include "space_l2.h"
 #include "space_ip.h"
+#include "space_hamming.h"
+#include "space_leven.h"
 #include "bruteforce.h"
 #include "hnswalg.h"

@@ -1,0 +1,3 @@
+[submodule "hnswlib/leven"]
+	path = hnswlib/leven
+	url = https://github.com/semanticize/leven.git

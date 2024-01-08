@@ -28,12 +28,12 @@ namespace hnswlib {
 
         ~VisitedList() { delete[] mass; }
     };
+
 ///////////////////////////////////////////////////////////
 //
 // Class for multi-threaded pool-management of VisitedLists
 //
 /////////////////////////////////////////////////////////
-
     class VisitedListPool {
         std::deque<VisitedList *> pool;
         std::mutex poolguard;
@@ -50,7 +50,7 @@ namespace hnswlib {
             VisitedList *rez;
             {
                 std::unique_lock <std::mutex> lock(poolguard);
-                if (pool.size() > 0) {
+                if (!pool.empty()) {
                     rez = pool.front();
                     pool.pop_front();
                 } else {
@@ -67,7 +67,7 @@ namespace hnswlib {
         };
 
         ~VisitedListPool() {
-            while (pool.size()) {
+            while (!pool.empty()) {
                 VisitedList *rez = pool.front();
                 pool.pop_front();
                 delete rez;
@@ -75,4 +75,3 @@ namespace hnswlib {
         };
     };
 }
-
